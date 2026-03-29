@@ -1,0 +1,25 @@
+name: Günlük Akşam Yemeği Tarifi
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # Her gün 13:00 UTC = 16:00 Türkiye (UTC+3)
+  workflow_dispatch:         # Manuel tetikleme butonu (tek tıkla çalıştır)
+
+jobs:
+  send-recipe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Bağımlılıkları yükle
+        run: pip install -r requirements.txt
+
+      - name: Tarifleri gönder
+        run: python main.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
