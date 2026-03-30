@@ -11,6 +11,9 @@ env:
 jobs:
   send-recipe:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # recipe_history.json'ı commit edebilmek için
+
     steps:
       - uses: actions/checkout@v4
 
@@ -26,3 +29,11 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+
+      - name: Tarif geçmişini kaydet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add recipe_history.json
+          git diff --cached --quiet || git commit -m "chore: tarif geçmişi güncellendi [skip ci]"
+          git push

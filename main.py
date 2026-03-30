@@ -4,26 +4,61 @@ import sys
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from datetime import datetime
+from datetime import datetime, timedelta
 import anthropic
 
 # --- Yapılandırma ---
 RECIPIENTS = ["ae.ozturk93@gmail.com", "eylulikraozturk@gmail.com"]
 SENDER_EMAIL = "ae.ozturk93@gmail.com"
 MAX_RETRY = 2
+HISTORY_FILE = "recipe_history.json"
 
 
-def get_recipes(client: anthropic.Anthropic, today: str) -> list[dict]:
+def load_recent_recipes() -> list[str]:
+    """Son 7 günde gönderilen tarif isimlerini oku."""
+    if not os.path.exists(HISTORY_FILE):
+        return []
+    with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+        history: dict = json.load(f)
+    cutoff = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    recent = []
+    for date, names in history.items():
+        if date >= cutoff:
+            recent.extend(names)
+    return recent
+
+
+def save_recipes_to_history(today: str, recipes: list[dict]):
+    """Bugün gönderilen tarifleri geçmişe kaydet."""
+    history = {}
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            history = json.load(f)
+    # 30 günden eski kayıtları temizle
+    cutoff = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+    history = {d: v for d, v in history.items() if d >= cutoff}
+    history[today] = [r.get("isim", "") for r in recipes]
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
+
+
+def get_recipes(client: anthropic.Anthropic, today: str, recent_recipes: list[str]) -> list[dict]:
     """Claude API'den 3 akşam yemeği tarifi al. Hata durumunda MAX_RETRY kez tekrar dene."""
+    avoid_section = ""
+    if recent_recipes:
+        avoid_list = ", ".join(f'"{r}"' for r in recent_recipes)
+        avoid_section = f"\nBu hafta zaten şu yemekler gönderildi, bunları tekrarlama: {avoid_list}\n"
+
     prompt = f"""Bana bugün akşam yemeği için 3 farklı tarif öner.
 Tarifler 2 kişilik olsun.
-Ev yemeği tarzında, proteinli ve doyurucu olsun (sulu yemekler, etli yemekler, tavuklu yemekler vb. olabilir).
-Her gün farklı tarifler üret, tekrar etme.
+Sadece ana yemek tarifleri olsun: etli yemekler, tavuklu yemekler, köfteler, kavurmalar, güveçler, zeytinyağlılar gibi doyurucu ev yemekleri.
+Pilav, çorba, salata gibi yan yemekler önerme — bunlar tek başına ana yemek değil.
+{avoid_section}
 Bugünün tarihi: {today}
 
 Malzemeleri yazarken mutlaka ölçü belirt (örn: "500g tavuk göğsü", "2 yemek kaşığı zeytinyağı", "1 çay kaşığı tuz").
 Yapılış adımları net ve ayrıntılı olsun: kaç dakika pişirileceği, ateş seviyesi (kısık/orta/yüksek), malzemelerin nasıl ekleneceği açıkça belirtilsin.
-Her adım tek bir işlemi tarif etsin, birden fazla işlemi tek adıma sıkıştırma.
+Her adım tek bir işlemi tarif etsin.
 
 Her tarif için şu formatta JSON döndür:
 [
@@ -44,7 +79,6 @@ Sadece JSON döndür, başka hiçbir şey ekleme."""
                 messages=[{"role": "user", "content": prompt}],
             )
             raw = message.content[0].text.strip()
-            # JSON bloğu içinde gelebilir, temizle
             if raw.startswith("```"):
                 raw = raw.split("```")[1]
                 if raw.startswith("json"):
@@ -180,15 +214,24 @@ def main():
         print("[HATA] GMAIL_APP_PASSWORD ortam değişkeni eksik!")
         sys.exit(1)
 
+    # Son 7 günün tarif geçmişini oku
+    recent_recipes = load_recent_recipes()
+    if recent_recipes:
+        print(f"Bu hafta gönderilen tarifler: {recent_recipes}")
+
     print("Claude API'den tarifler alınıyor...")
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    recipes = get_recipes(client, today)
+    recipes = get_recipes(client, today, recent_recipes)
     print(f"{len(recipes)} tarif alındı: {[r.get('isim') for r in recipes]}")
 
     html = build_html(recipes, today)
 
     print("Mailler gönderiliyor...")
     send_emails(html, today)
+
+    # Geçmişi güncelle
+    save_recipes_to_history(today, recipes)
+    print("Geçmiş güncellendi.")
 
     print("=== Tamamlandı ===")
 
