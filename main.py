@@ -63,6 +63,7 @@ Spor tarifinde işlenmiş gıda ve rafine şeker olmasın, protein kaynağı net
 Tatlıda basit malzemelerle evde kolayca yapılabilecek bir tarif seç.
 
 Malzemeleri yazarken mutlaka ölçü belirt (örn: "500g tavuk göğsü", "2 yemek kaşığı zeytinyağı").
+Tüm malzeme isimleri Türkçe olsun. Yabancı isim kullanma: oregano → kekik, thyme → kekik, rosemary → biberiye, basil → fesleğen, cumin → kimyon, paprika → kırmızı biber, garlic → sarımsak vb.
 Yapılış adımları net ve ayrıntılı olsun: kaç dakika pişirileceği, ateş seviyesi (kısık/orta/yüksek), malzemelerin nasıl ekleneceği açıkça belirtilsin.
 Her adım tek bir işlemi tarif etsin.
 
