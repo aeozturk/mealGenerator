@@ -52,7 +52,7 @@ def get_image_url(query: str) -> str | None:
         resp = requests.get(
             "https://api.pexels.com/v1/search",
             headers={"Authorization": api_key},
-            params={"query": f"{query} food", "per_page": 1, "orientation": "landscape"},
+            params={"query": f"{query} plated dish", "per_page": 1, "orientation": "landscape"},
             timeout=10,
         )
         data = resp.json()
@@ -94,7 +94,7 @@ Tam olarak şu formatta JSON döndür (5 eleman):
   {{
     "kategori": "ana_yemek",
     "isim": "Tarif adı",
-    "gorsel_arama": "English search term for a food photo (e.g. 'chicken stew', 'beef meatballs')",
+    "gorsel_arama": "Simple English search term for the MAIN INGREDIENT only, not the full dish name (e.g. 'grilled chicken', 'beef stew', 'lentil soup', 'chocolate cake'). Keep it short and generic so stock photo sites can find a match.",
     "süre": "Toplam süre (dk)",
     "malzemeler": ["500g tavuk göğsü", "2 yemek kaşığı zeytinyağı"],
     "yapılış": ["Tavukları 2x2 cm küp şeklinde doğrayın.", "Orta ateşte tavayı ısıtın."]
