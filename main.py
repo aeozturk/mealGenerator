@@ -1,13 +1,15 @@
 import os
 import json
 import sys
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from datetime import datetime
 import anthropic
-import resend
 
 # --- Yapılandırma ---
 RECIPIENTS = ["ae.ozturk93@gmail.com", "eylulikraozturk@gmail.com"]
-SENDER = "Akşam Yemeği Tarifleri <onboarding@resend.dev>"
+SENDER_EMAIL = "ae.ozturk93@gmail.com"
 MAX_RETRY = 2
 
 
@@ -57,7 +59,6 @@ Sadece JSON döndür, başka hiçbir şey ekleme."""
 
 def build_html(recipes: list[dict], today: str) -> str:
     """Tarif listesinden güzel HTML mail içeriği oluştur."""
-    # Tarih Türkçe formatında gösterilsin
     try:
         dt = datetime.strptime(today, "%Y-%m-%d")
         months = [
@@ -68,7 +69,6 @@ def build_html(recipes: list[dict], today: str) -> str:
     except ValueError:
         date_display = today
 
-    # Her tarif için bir kart
     CARD_COLORS = ["#e8f5e9", "#e3f2fd", "#fff3e0"]
     ACCENT_COLORS = ["#2e7d32", "#1565c0", "#e65100"]
 
@@ -114,14 +114,12 @@ def build_html(recipes: list[dict], today: str) -> str:
 <body style="margin:0; padding:0; background:#f5f5f5; font-family:'Segoe UI',Arial,sans-serif;">
   <div style="max-width:600px; margin:32px auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.1);">
 
-    <!-- Header -->
     <div style="background:linear-gradient(135deg,#ff6b35,#f7931e); padding:32px 24px; text-align:center;">
       <div style="font-size:48px; margin-bottom:8px;">🍽️</div>
       <h1 style="margin:0; color:#fff; font-size:24px; font-weight:700;">Bugünün Akşam Yemeği Tarifleri</h1>
       <p style="margin:8px 0 0 0; color:rgba(255,255,255,0.9); font-size:15px;">{date_display}</p>
     </div>
 
-    <!-- Giriş metni -->
     <div style="padding:24px 24px 8px 24px;">
       <p style="margin:0; color:#555; font-size:15px; line-height:1.6;">
         Merhaba! 👋 Bugün akşam ne pişireceğinize karar veremediniz mi?
@@ -129,12 +127,10 @@ def build_html(recipes: list[dict], today: str) -> str:
       </p>
     </div>
 
-    <!-- Tarifler -->
     <div style="padding:16px 24px;">
       {cards_html}
     </div>
 
-    <!-- Footer -->
     <div style="background:#fafafa; border-top:1px solid #eee; padding:20px 24px; text-align:center;">
       <p style="margin:0; color:#888; font-size:13px;">
         Yarın da güzel yemekler 🙂
@@ -150,48 +146,43 @@ def build_html(recipes: list[dict], today: str) -> str:
 
 
 def send_emails(html: str, today: str):
-    """Resend API ile iki alıcıya HTML mail gönder."""
-    resend.api_key = os.environ["RESEND_API_KEY"]
-
+    """Gmail SMTP ile tüm alıcılara HTML mail gönder."""
+    app_password = os.environ["GMAIL_APP_PASSWORD"]
     subject = f"🍽️ Bugünün Akşam Yemeği Tarifleri — {today}"
 
-    for recipient in RECIPIENTS:
-        try:
-            params: resend.Emails.SendParams = {
-                "from": SENDER,
-                "to": [recipient],
-                "subject": subject,
-                "html": html,
-            }
-            response = resend.Emails.send(params)
-            print(f"[OK] Mail gönderildi → {recipient} (id: {response.id})")
-        except Exception as exc:
-            print(f"[HATA] Mail gönderilemedi → {recipient}: {exc}")
-            raise
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(SENDER_EMAIL, app_password)
+        for recipient in RECIPIENTS:
+            try:
+                msg = MIMEMultipart("alternative")
+                msg["Subject"] = subject
+                msg["From"] = f"Akşam Yemeği Tarifleri <{SENDER_EMAIL}>"
+                msg["To"] = recipient
+                msg.attach(MIMEText(html, "html", "utf-8"))
+                server.sendmail(SENDER_EMAIL, recipient, msg.as_string())
+                print(f"[OK] Mail gönderildi → {recipient}")
+            except Exception as exc:
+                print(f"[HATA] Mail gönderilemedi → {recipient}: {exc}")
 
 
 def main():
     today = datetime.now().strftime("%Y-%m-%d")
     print(f"=== Akşam Yemeği Tarifi Maili — {today} ===")
 
-    # API key'leri kontrol et
     if not os.environ.get("ANTHROPIC_API_KEY"):
         print("[HATA] ANTHROPIC_API_KEY ortam değişkeni eksik!")
         sys.exit(1)
-    if not os.environ.get("RESEND_API_KEY"):
-        print("[HATA] RESEND_API_KEY ortam değişkeni eksik!")
+    if not os.environ.get("GMAIL_APP_PASSWORD"):
+        print("[HATA] GMAIL_APP_PASSWORD ortam değişkeni eksik!")
         sys.exit(1)
 
-    # 1. Tarifleri Claude'dan al
     print("Claude API'den tarifler alınıyor...")
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     recipes = get_recipes(client, today)
     print(f"{len(recipes)} tarif alındı: {[r.get('isim') for r in recipes]}")
 
-    # 2. HTML şablon oluştur
     html = build_html(recipes, today)
 
-    # 3. Mail gönder
     print("Mailler gönderiliyor...")
     send_emails(html, today)
 
