@@ -6,7 +6,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import anthropic
-import requests
 
 # --- Yapılandırma ---
 RECIPIENTS = ["ae.ozturk93@gmail.com", "eylulikraozturk@gmail.com"]
@@ -43,26 +42,6 @@ def save_recipes_to_history(today: str, recipes: list[dict]):
         json.dump(history, f, ensure_ascii=False, indent=2)
 
 
-def get_image_url(query: str) -> str | None:
-    """Pexels API ile yemek görseli URL'si döndür. Bulunamazsa None."""
-    api_key = os.environ.get("PEXELS_API_KEY")
-    if not api_key:
-        return None
-    try:
-        resp = requests.get(
-            "https://api.pexels.com/v1/search",
-            headers={"Authorization": api_key},
-            params={"query": f"{query} plated dish", "per_page": 1, "orientation": "landscape"},
-            timeout=10,
-        )
-        data = resp.json()
-        photos = data.get("photos", [])
-        if photos:
-            return photos[0]["src"]["large"]
-    except Exception as exc:
-        print(f"[UYARI] Görsel alınamadı ({query}): {exc}")
-    return None
-
 
 def get_recipes(client: anthropic.Anthropic, today: str, recent_recipes: list[str]) -> list[dict]:
     """Claude API'den 5 tarif al (3 ana yemek, 1 spor, 1 tatlı). Hata durumunda MAX_RETRY kez tekrar dene."""
@@ -94,7 +73,6 @@ Tam olarak şu formatta JSON döndür (5 eleman):
   {{
     "kategori": "ana_yemek",
     "isim": "Tarif adı",
-    "gorsel_arama": "Simple English search term for the MAIN INGREDIENT only, not the full dish name (e.g. 'grilled chicken', 'beef stew', 'lentil soup', 'chocolate cake'). Keep it short and generic so stock photo sites can find a match.",
     "süre": "Toplam süre (dk)",
     "malzemeler": ["500g tavuk göğsü", "2 yemek kaşığı zeytinyağı"],
     "yapılış": ["Tavukları 2x2 cm küp şeklinde doğrayın.", "Orta ateşte tavayı ısıtın."]
@@ -176,15 +154,8 @@ def build_html(recipes: list[dict], today: str) -> str:
             for step in recipe.get("yapılış", [])
         )
 
-        image_url = get_image_url(recipe.get("gorsel_arama", baslik))
-        image_html = (
-            f'<img src="{image_url}" alt="{baslik}" style="width:100%; height:200px; object-fit:cover; border-radius:8px; margin-bottom:16px; display:block;">'
-            if image_url else ""
-        )
-
         cards_html += f"""
         <div style="background:{color}; border-radius:12px; padding:24px; margin-bottom:24px; border-left:5px solid {accent};">
-            {image_html}
             <div style="margin-bottom:10px;">
                 <span style="background:{accent}; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:0.5px;">
                     {icon} {label.upper()}
