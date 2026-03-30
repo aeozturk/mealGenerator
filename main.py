@@ -21,13 +21,17 @@ Ev yemeği tarzında, proteinli ve doyurucu olsun (sulu yemekler, etli yemekler,
 Her gün farklı tarifler üret, tekrar etme.
 Bugünün tarihi: {today}
 
+Malzemeleri yazarken mutlaka ölçü belirt (örn: "500g tavuk göğsü", "2 yemek kaşığı zeytinyağı", "1 çay kaşığı tuz").
+Yapılış adımları net ve ayrıntılı olsun: kaç dakika pişirileceği, ateş seviyesi (kısık/orta/yüksek), malzemelerin nasıl ekleneceği açıkça belirtilsin.
+Her adım tek bir işlemi tarif etsin, birden fazla işlemi tek adıma sıkıştırma.
+
 Her tarif için şu formatta JSON döndür:
 [
   {{
     "isim": "Tarif adı",
     "süre": "Toplam süre (dk)",
-    "malzemeler": ["malzeme 1", "malzeme 2"],
-    "yapılış": ["Adım 1", "Adım 2"]
+    "malzemeler": ["500g tavuk göğsü", "2 yemek kaşığı zeytinyağı"],
+    "yapılış": ["Tavukları 2x2 cm küp şeklinde doğrayın.", "Orta ateşte tavayı ısıtın ve zeytinyağını ekleyin."]
   }}
 ]
 Sadece JSON döndür, başka hiçbir şey ekleme."""
