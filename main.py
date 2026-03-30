@@ -43,30 +43,37 @@ def save_recipes_to_history(today: str, recipes: list[dict]):
 
 
 def get_recipes(client: anthropic.Anthropic, today: str, recent_recipes: list[str]) -> list[dict]:
-    """Claude API'den 3 akşam yemeği tarifi al. Hata durumunda MAX_RETRY kez tekrar dene."""
+    """Claude API'den 5 tarif al (3 ana yemek, 1 spor, 1 tatlı). Hata durumunda MAX_RETRY kez tekrar dene."""
     avoid_section = ""
     if recent_recipes:
         avoid_list = ", ".join(f'"{r}"' for r in recent_recipes)
         avoid_section = f"\nBu hafta zaten şu yemekler gönderildi, bunları tekrarlama: {avoid_list}\n"
 
-    prompt = f"""Bana bugün akşam yemeği için 3 farklı tarif öner.
-Tarifler 2 kişilik olsun.
-Sadece ana yemek tarifleri olsun: etli yemekler, tavuklu yemekler, köfteler, kavurmalar, güveçler, zeytinyağlılar gibi doyurucu ev yemekleri.
-Pilav, çorba, salata gibi yan yemekler önerme — bunlar tek başına ana yemek değil.
+    prompt = f"""Bana bugün için toplamda 5 tarif öner. Tarifler 2 kişilik olsun.
 {avoid_section}
 Bugünün tarihi: {today}
 
-Malzemeleri yazarken mutlaka ölçü belirt (örn: "500g tavuk göğsü", "2 yemek kaşığı zeytinyağı", "1 çay kaşığı tuz").
+Tarifler şu kategorilerde olsun:
+1. Ana yemek — etli, tavuklu, köfte, kavurma, güveç gibi doyurucu ev yemeği (3 adet, "ana_yemek" kategorisi)
+2. Spor tarifi — spor yapan biri için protein ağırlıklı, sağlıklı karbonhidratlı, pratik bir yemek (1 adet, "spor" kategorisi)
+3. Tatlı — pratik ve yapması kolay bir tatlı (1 adet, "tatlı" kategorisi)
+
+Ana yemeklerde pilav, çorba, salata gibi yan yemekler önerme.
+Spor tarifinde işlenmiş gıda ve rafine şeker olmasın, protein kaynağı net olsun (tavuk, yumurta, ton balığı, baklagil vb.).
+Tatlıda basit malzemelerle evde kolayca yapılabilecek bir tarif seç.
+
+Malzemeleri yazarken mutlaka ölçü belirt (örn: "500g tavuk göğsü", "2 yemek kaşığı zeytinyağı").
 Yapılış adımları net ve ayrıntılı olsun: kaç dakika pişirileceği, ateş seviyesi (kısık/orta/yüksek), malzemelerin nasıl ekleneceği açıkça belirtilsin.
 Her adım tek bir işlemi tarif etsin.
 
-Her tarif için şu formatta JSON döndür:
+Tam olarak şu formatta JSON döndür (5 eleman):
 [
   {{
+    "kategori": "ana_yemek",
     "isim": "Tarif adı",
     "süre": "Toplam süre (dk)",
     "malzemeler": ["500g tavuk göğsü", "2 yemek kaşığı zeytinyağı"],
-    "yapılış": ["Tavukları 2x2 cm küp şeklinde doğrayın.", "Orta ateşte tavayı ısıtın ve zeytinyağını ekleyin."]
+    "yapılış": ["Tavukları 2x2 cm küp şeklinde doğrayın.", "Orta ateşte tavayı ısıtın."]
   }}
 ]
 Sadece JSON döndür, başka hiçbir şey ekleme."""
@@ -107,13 +114,34 @@ def build_html(recipes: list[dict], today: str) -> str:
     except ValueError:
         date_display = today
 
-    CARD_COLORS = ["#e8f5e9", "#e3f2fd", "#fff3e0"]
-    ACCENT_COLORS = ["#2e7d32", "#1565c0", "#e65100"]
+    CATEGORY_STYLES = {
+        "ana_yemek": {"color": "#e8f5e9", "accent": "#2e7d32", "icon": "🍽️", "label": "Ana Yemek"},
+        "spor":      {"color": "#e3f2fd", "accent": "#1565c0", "icon": "💪", "label": "Spor Tarifi"},
+        "tatlı":     {"color": "#fce4ec", "accent": "#c62828", "icon": "🍮", "label": "Tatlı"},
+    }
+    DEFAULT_STYLE = {"color": "#fff3e0", "accent": "#e65100", "icon": "🍴", "label": "Tarif"}
+
+    # Kategoriye göre grupla ve sırala
+    ana_yemekler = [r for r in recipes if r.get("kategori") == "ana_yemek"]
+    spor = [r for r in recipes if r.get("kategori") == "spor"]
+    tatlilar = [r for r in recipes if r.get("kategori") == "tatlı"]
+    ordered = ana_yemekler + spor + tatlilar
 
     cards_html = ""
-    for i, recipe in enumerate(recipes):
-        color = CARD_COLORS[i % len(CARD_COLORS)]
-        accent = ACCENT_COLORS[i % len(ACCENT_COLORS)]
+    ana_counter = 0
+    for recipe in ordered:
+        kategori = recipe.get("kategori", "")
+        style = CATEGORY_STYLES.get(kategori, DEFAULT_STYLE)
+        color = style["color"]
+        accent = style["accent"]
+        icon = style["icon"]
+        label = style["label"]
+
+        if kategori == "ana_yemek":
+            ana_counter += 1
+            baslik = f"{ana_counter}. {recipe.get('isim', 'Tarif')}"
+        else:
+            baslik = recipe.get("isim", "Tarif")
 
         ingredients = "".join(
             f"<li style='margin:4px 0;'>{item}</li>"
@@ -126,9 +154,12 @@ def build_html(recipes: list[dict], today: str) -> str:
 
         cards_html += f"""
         <div style="background:{color}; border-radius:12px; padding:24px; margin-bottom:24px; border-left:5px solid {accent};">
-            <h2 style="margin:0 0 8px 0; color:{accent}; font-size:20px;">
-                {i+1}. {recipe.get('isim', 'Tarif')}
-            </h2>
+            <div style="margin-bottom:10px;">
+                <span style="background:{accent}; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:0.5px;">
+                    {icon} {label.upper()}
+                </span>
+            </div>
+            <h2 style="margin:0 0 8px 0; color:{accent}; font-size:20px;">{baslik}</h2>
             <p style="margin:0 0 16px 0; color:#555; font-size:14px;">
                 ⏱️ Süre: <strong>{recipe.get('süre', '?')}</strong> &nbsp;|&nbsp; 👥 2 kişilik
             </p>
@@ -161,7 +192,7 @@ def build_html(recipes: list[dict], today: str) -> str:
     <div style="padding:24px 24px 8px 24px;">
       <p style="margin:0; color:#555; font-size:15px; line-height:1.6;">
         Merhaba! 👋 Bugün akşam ne pişireceğinize karar veremediniz mi?
-        İşte <strong>3 lezzetli öneri</strong> — hepsi 2 kişilik, doyurucu ve yapması kolay.
+        İşte bugün için <strong>5 tarif</strong> — 3 ana yemek, 1 spor tarifi ve 1 tatlı.
       </p>
     </div>
 
