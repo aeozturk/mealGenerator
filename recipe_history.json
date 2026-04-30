@@ -1,11 +1,4 @@
 {
-  "2026-03-30": [
-    "Şeftali ve Soğan Kebabı",
-    "Bahçıvan Pide",
-    "Fırında Balık ve Kayısı",
-    "Ton Balığı ve Kinoalı Bowlü",
-    "Kahveli Fındık Turşusu"
-  ],
   "2026-03-31": [
     "Kuzu Güveç",
     "İzmir Köftesi",
@@ -201,5 +194,12 @@
     "Fırında Soslu Tavuk Göğsü ve Sebze Tenceresi",
     "Tavuk Göğsü, Nohut ve Sebze Tabağı",
     "Fırında Bal ve Fındık Çıtırı"
+  ],
+  "2026-04-30": [
+    "Tavada Soslu Sığır Eti ve Patlıcan Kavurması",
+    "Tavada Soslu Tavuk Filesi ve Mantar Kavurması",
+    "Fırında Soslu Balık Filesi ve Brokoli Güveçi",
+    "Ton Balığı, Buğday Pilavı ve Sebze Tabağı",
+    "Tereyağında Pişirilmiş Armut Tatlısı"
   ]
 }
