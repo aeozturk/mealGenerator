@@ -1,11 +1,4 @@
 {
-  "2026-03-31": [
-    "Kuzu Güveç",
-    "İzmir Köftesi",
-    "Tavuk Kavurması",
-    "Tavuk Göğsü ve Kinoa Tabağı",
-    "Çikolatalı Muzlu Kek"
-  ],
   "2026-04-01": [
     "Adana Kebabı",
     "Ciğer Tava",
@@ -201,5 +194,12 @@
     "Fırında Soslu Balık Filesi ve Brokoli Güveçi",
     "Ton Balığı, Buğday Pilavı ve Sebze Tabağı",
     "Tereyağında Pişirilmiş Armut Tatlısı"
+  ],
+  "2026-05-01": [
+    "Tavada Soslu Karaciğer ve Soğan Kavurması",
+    "Fırında Soslu Koyun Eti ve Havuç Güveçi",
+    "Tavada Soslu Köfte ve Mantarlar",
+    "Tavuk Göğsü, Yer Fıstığı Ezmesi ve Avokado Tabağı",
+    "Tereyağında Pişirilmiş Vişne Tatlısı"
   ]
 }
