@@ -1,11 +1,4 @@
 {
-  "2026-04-01": [
-    "Adana Kebabı",
-    "Ciğer Tava",
-    "Sote Tavuk",
-    "Yumurtalı Buğday Pilavı ve Mercimek",
-    "Fındık Ezmeli Browni"
-  ],
   "2026-04-02": [
     "Fırında Tavuk Şinitzel",
     "Kızartma Soslu Dana Biftek",
@@ -201,5 +194,12 @@
     "Tavada Soslu Köfte ve Mantarlar",
     "Tavuk Göğsü, Yer Fıstığı Ezmesi ve Avokado Tabağı",
     "Tereyağında Pişirilmiş Vişne Tatlısı"
+  ],
+  "2026-05-02": [
+    "Tavada Soslu Sığır Eti ve Kabak Kavurması",
+    "Fırında Soslu Tavuk Göğsü ve Havuç Güveçi",
+    "Tavada Soslu Köfte ve Yeşil Soğan Kavurması",
+    "Ton Balığı, Kırmızı Lentil ve Brokoli Tabağı",
+    "Fırında Pişirilmiş Muz ve Tarçın Tatlısı"
   ]
 }
