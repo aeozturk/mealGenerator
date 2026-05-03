@@ -1,11 +1,4 @@
 {
-  "2026-04-02": [
-    "Fırında Tavuk Şinitzel",
-    "Kızartma Soslu Dana Biftek",
-    "Fırında Balık Köfte",
-    "Mercimek ve Tavuk Göğsü Tabağı",
-    "Klasik Fındık Çıtası"
-  ],
   "2026-04-03": [
     "Bahçıvan Kebabı",
     "Fırında Soslu Tavuk Kanat",
@@ -201,5 +194,12 @@
     "Tavada Soslu Köfte ve Yeşil Soğan Kavurması",
     "Ton Balığı, Kırmızı Lentil ve Brokoli Tabağı",
     "Fırında Pişirilmiş Muz ve Tarçın Tatlısı"
+  ],
+  "2026-05-03": [
+    "Tavada Soslu Sığır Eti ve Soğan Kavurması",
+    "Fırında Soslu Beyaz Peynirli Tavuk Göğsü",
+    "Tavada Soslu Koyun Köfte ve Yeşil Biber Kavurması",
+    "Tavuk Göğsü, Kinoa ve Brokoli Tabağı",
+    "Tavanın İçinde Çikolatalı Muz Tatlısı"
   ]
 }
