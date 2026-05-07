@@ -1,11 +1,4 @@
 {
-  "2026-04-06": [
-    "Fırında Soslu Kıymalı Nohut Güveç",
-    "Balık Ve Sebzeli Buğulama",
-    "Tavuk Göğsü Ve Sebzeli Tencere Yemeği",
-    "Tavuk Göğsü, Pirinç Ve Brocoli Tabağı",
-    "Yoğunlu Çikolata Pudingi"
-  ],
   "2026-04-07": [
     "Fırında Soslu Kıyma ve Kabak Tenceresi",
     "Fırında Soslu Balık Filetosu",
@@ -194,5 +187,12 @@
     "Tavada Soslu Köfte ve Domates Kavurması",
     "Haşlanmış Yumurta, Ay Çekirdeği ve Brokoli Tabağı",
     "Tavada Karamelize Yapılmış Ananas ve Hindistan Cevizi Tatlısı"
+  ],
+  "2026-05-07": [
+    "Tavada Soslu Sığır Eti ve Pırasa Kavurması",
+    "Fırında Soslu Çipura Filesi ve Yoğun Sebze Güveçi",
+    "Tavada Soslu Tavuk Köfte ve Biber Kavurması",
+    "Fırında Pişirilmiş Tavuk Göğsü, Yoğun Pirinç Pilavı ve Pazı",
+    "Tereyağında Karamelize Yapılmış Elma ve Tarçın"
   ]
 }
