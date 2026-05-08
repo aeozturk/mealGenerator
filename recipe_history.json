@@ -1,11 +1,4 @@
 {
-  "2026-04-07": [
-    "Fırında Soslu Kıyma ve Kabak Tenceresi",
-    "Fırında Soslu Balık Filetosu",
-    "Soslu Tavuk Döner",
-    "Proteinli Tavuk ve Kinoa Tabağı",
-    "Portakallı Yoğurt Pudingi"
-  ],
   "2026-04-08": [
     "Fırında Soslu Kıymalı Kabak Tenceresi",
     "Sos Eşliğinde Kuzulu Köfte",
@@ -194,5 +187,12 @@
     "Tavada Soslu Tavuk Köfte ve Biber Kavurması",
     "Fırında Pişirilmiş Tavuk Göğsü, Yoğun Pirinç Pilavı ve Pazı",
     "Tereyağında Karamelize Yapılmış Elma ve Tarçın"
+  ],
+  "2026-05-08": [
+    "Tavada Soslu Balık ve Mantar Kavurması",
+    "Fırında Soslu Kuzu Eti ve Patlıcan Güveçi",
+    "Tavada Soslu Sığır Eti ve Biber Kavurması",
+    "Kızartılmış Tavuk Göğsü, Kinoa ve Yeşil Sebzeler",
+    "Tavada Karamelize Armut ve Bal Tatlısı"
   ]
 }
